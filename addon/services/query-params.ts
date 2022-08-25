@@ -64,6 +64,10 @@ export default class QueryParamsService extends Service {
    *
    */
   private updateURL(routeName: string) {
+    if (!window) {
+      return;
+    }
+
     const path = this.router.urlFor(routeName);
     const { protocol, host, pathname, search, hash } = window.location;
     const queryParams = this.byPath[path];
@@ -111,11 +115,13 @@ const queryParamHandler = {
     return Reflect.get(obj, key, ...rest);
   },
   set(obj: any, key: string, value: any, ...rest: any[]) {
-    let { protocol, host, pathname } = window.location;
-    let query = qs.stringify(sortKeys({ ...obj, [key]: value }));
-    let newUrl = `${protocol}//${host}${pathname}${isPresent(query) ? '?' : ''}${query}`;
+    if (window) {
+      let { protocol, host, pathname } = window.location;
+      let query = qs.stringify(sortKeys({ ...obj, [key]: value }));
+      let newUrl = `${protocol}//${host}${pathname}${isPresent(query) ? '?' : ''}${query}`;
 
-    window.history.pushState({ path: newUrl }, '', newUrl);
+      window.history.pushState({ path: newUrl }, '', newUrl);
+    }
 
     return Reflect.set(obj, key, value, ...rest);
   },
